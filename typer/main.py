@@ -213,7 +213,7 @@ class Typer:
         return get_command(self)()
 
 
-def get_group(typer_instance: Typer) -> click.Command:
+def get_group(typer_instance: Typer) -> click.Group:
     group = get_group_from_info(TyperInfo(typer_instance))
     return group
 
@@ -228,11 +228,11 @@ def get_command(typer_instance: Typer) -> click.Command:
         or len(typer_instance.registered_commands) > 1
     ):
         # Create a Group
-        click_command = get_group(typer_instance)
+        click_group = get_group(typer_instance)
         if typer_instance._add_completion:
-            click_command.params.append(click_install_param)
-            click_command.params.append(click_show_param)
-        return click_command
+            click_group.params.append(click_install_param)
+            click_group.params.append(click_show_param)
+        return click_group
     elif len(typer_instance.registered_commands) == 1:
         # Create a single Command
         click_command = get_command_from_info(typer_instance.registered_commands[0])
@@ -339,7 +339,7 @@ def solve_typer_info_defaults(typer_info: TyperInfo) -> TyperInfo:
     return TyperInfo(**values)
 
 
-def get_group_from_info(group_info: TyperInfo) -> click.Command:
+def get_group_from_info(group_info: TyperInfo) -> click.Group:
     assert (
         group_info.typer_instance
     ), "A Typer instance is needed to generate a Click Group"
@@ -356,7 +356,7 @@ def get_group_from_info(group_info: TyperInfo) -> click.Command:
         convertors,
         context_param_name,
     ) = get_params_convertors_ctx_param_name_from_function(solved_info.callback)
-    cls = solved_info.cls or click.Group
+    cls = click.Group
     group = cls(  # type: ignore
         name=solved_info.name or "",
         commands=commands,
